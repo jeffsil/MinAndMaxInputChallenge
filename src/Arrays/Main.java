@@ -52,14 +52,14 @@ public class Main {
     }
 
     public static void printArray(int[] array) {
-        System.out.println("\nSORTED");
+        System.out.println("\n--SORTED--");
         for(int i=0; i<array.length; i++) {
             System.out.println("Element " + i +", typed value was " + array[i]);
         }
     }
 
     public static void printArray(IntegerArray[] array) {
-        System.out.println("\nUNSORTED");
+        System.out.println("\n--UNSORTED--");
         for(int i=0; i<array.length; i++) {
             System.out.println("Element " + i +", typed value was " + array[i].getValue());
         }
