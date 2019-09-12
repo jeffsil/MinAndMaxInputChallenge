@@ -11,10 +11,6 @@ public class Branch {
         this.customers = new ArrayList<Customer>();
     }
 
-    public static Branch createBranch(String branchName) {
-        return new Branch(branchName);
-    }
-
     public String getBranchName() {
         return branchName;
     }

@@ -4,11 +4,12 @@ import java.util.ArrayList;
 
 public class Customer {
     private String customerName;
-    private ArrayList<Double> transactions = new ArrayList<Double>();
+    private ArrayList<Double> transactions;
 
 
     public Customer(String customerName, Double transaction) {
         this.customerName = customerName;
+        this.transactions = new ArrayList<Double>();
         this.transactions.add(transaction);
     }
 

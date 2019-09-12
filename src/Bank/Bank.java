@@ -12,15 +12,14 @@ public class Bank {
         this.branches = new ArrayList<Branch>();
     }
 
-    public void addNewBranch(Branch branch) {
-//        if(findContact(contact.getName()) >=0) {
-//            System.out.println("Contact is already on file");
-//            return false;
-//        }
-
-        branches.add(branch);
-//        return true;
-
+    public boolean addNewBranch(String branchName) {
+        if (findBranch(branchName) <0) {
+            branches.add(new Branch(branchName));
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     public String getBankName() {

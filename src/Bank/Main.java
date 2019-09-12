@@ -61,8 +61,24 @@ public class Main {
     private static void addNewBranch() {
         System.out.println("Enter new branch name: ");
         String branchName = scanner.nextLine();
-        Branch newBranch = Branch.createBranch(branchName);
-        bank.addNewBranch(newBranch);
+
+        if (bank.addNewBranch(branchName)) {
+            System.out.println("Branch " +branchName +" has been added");
+        } else {
+            System.out.println("Branch " +branchName +" already exists");
+        }
+    }
+
+    private static void addNewCustomerToBranch() {
+        System.out.println("Enter branch name for new customer: ");
+        String branchName = scanner.nextLine();
+        System.out.println("Enter name for new customer: ");
+        String customerName = scanner.nextLine();
+        System.out.println("Enter initial transaction amount: ");
+        Double transactionAmount = scanner.nextDouble();
+
+        Customer newCustomer = Customer.createCustomer(customerName, transactionAmount);
+        bank.addNewCustomer(newCustomer, branchName);
     }
 
     private static void showCustomerList() {
@@ -78,17 +94,5 @@ public class Main {
         Double transactionAmount = scanner.nextDouble();
 
         bank.addTransaction(customerName, branchName, transactionAmount);
-    }
-
-    private static void addNewCustomerToBranch() {
-        System.out.println("Enter branch name for new customer: ");
-        String branchName = scanner.nextLine();
-        System.out.println("Enter name for new customer: ");
-        String customerName = scanner.nextLine();
-        System.out.println("Enter initial transaction amount: ");
-        Double transactionAmount = scanner.nextDouble();
-
-        Customer newCustomer = Customer.createCustomer(customerName, transactionAmount);
-        bank.addNewCustomer(newCustomer, branchName);
     }
 }
