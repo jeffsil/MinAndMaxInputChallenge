@@ -8,6 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BarnRepository extends JpaRepository<Barn, Long> {
 
-  // additional methods can be defined here
 
 }
