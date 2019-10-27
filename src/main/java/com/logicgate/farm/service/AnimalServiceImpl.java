@@ -108,7 +108,7 @@ public class AnimalServiceImpl implements AnimalService {
               animalsInMatchingColorBarn+=barnAnimalMap.get(matchingBarnsList.get(j)).size();
             }
 
-            redistribute(matchingBarnsList, animalsInMatchingColorBarn, animal);
+            redistribute(matchingBarnsList, animalsInMatchingColorBarn, tempAnimal, false);
 
 
 //            System.out.println("total barns for this color is " +matchingBarnsList.size()
@@ -156,7 +156,7 @@ public class AnimalServiceImpl implements AnimalService {
                 animalsInMatchingColorBarn+=barnAnimalMap.get(matchingBarnsList.get(j)).size();
               }
 
-              redistribute(matchingBarnsList, animalsInMatchingColorBarn, animal);
+              redistribute(matchingBarnsList, animalsInMatchingColorBarn, tempAnimal, false);
 
 //              System.out.println("total barns for this color is " +matchingBarnsList.size()
 //                +" animals in matching color barn is " +animalsInMatchingColorBarn);
@@ -179,7 +179,8 @@ public class AnimalServiceImpl implements AnimalService {
     }
   }
 
-  private void redistribute(List<Barn> matchingBarnsList, int animalsInMatchingColorBarn, Animal animal) {
+  private void redistribute(List<Barn> matchingBarnsList, int animalsInMatchingColorBarn, Animal animal,
+                            boolean deleteFlag) {
     // need to redistribute
     double numberOfBarnsNeeded = Math.ceil((double) animalsInMatchingColorBarn / (double) 20);
     int setCount = 0;
@@ -190,84 +191,161 @@ public class AnimalServiceImpl implements AnimalService {
     AtomicBoolean multipleOf20DeleteFlag = new AtomicBoolean(false);
     ArrayList<Barn> newBarnList = new ArrayList<>();
     ArrayList<Integer> barnList = new ArrayList<>();
+    ArrayList<Barn> removeFromMapList = new ArrayList<>();
 
     List<Animal> animalResult = findAll();
     Map<Barn, List<Animal>> barnAnimalMap = animalResult.stream()
       .collect(Collectors.groupingBy(Animal::getBarn));
 
-
     int diffBetweenBarnsNeededAndBarnsList = matchingBarnsList.size() - (int) numberOfBarnsNeeded;
 
-    if (diffBetweenBarnsNeededAndBarnsList > 0) {
-      for (int k = 0; k < numberOfBarnsNeeded; k++) {
-        barnList.add(averageAnimalsPerBarn);
+    for (int k = 0; k < numberOfBarnsNeeded; k++) {
+      if (averageAnimalsPerBarnRemainder > 0) {
+        barnList.add(averageAnimalsPerBarnPlusRemainder);
+        averageAnimalsPerBarnRemainder--;
         Barn tempBarn = new Barn(animal.getFavoriteColor().toString(), animal.getFavoriteColor());
         barnRepository.save(tempBarn);
         newBarnList.add(tempBarn);
+        continue;
       }
-    }
-    else {
-      for (int k = 0; k < matchingBarnsList.size(); k++) {
-        if (averageAnimalsPerBarnRemainder > 0) {
-          barnList.add(averageAnimalsPerBarnPlusRemainder);
-          averageAnimalsPerBarnRemainder--;
-          Barn tempBarn = new Barn(animal.getFavoriteColor().toString(), animal.getFavoriteColor());
-          barnRepository.save(tempBarn);
-          newBarnList.add(tempBarn);
-          continue;
-        }
-        barnList.add(averageAnimalsPerBarn);
-        Barn tempBarn = new Barn(animal.getFavoriteColor().toString(), animal.getFavoriteColor());
-        barnRepository.save(tempBarn);
-        newBarnList.add(tempBarn);
-      }
+      barnList.add(averageAnimalsPerBarn);
+      Barn tempBarn = new Barn(animal.getFavoriteColor().toString(), animal.getFavoriteColor());
+      barnRepository.save(tempBarn);
+      newBarnList.add(tempBarn);
     }
 
-    setCount = 0;
+//    if (diffBetweenBarnsNeededAndBarnsList > 0) {
+//      for (int k = 0; k < numberOfBarnsNeeded; k++) {
+//        barnList.add(averageAnimalsPerBarn);
+//        Barn tempBarn = new Barn(animal.getFavoriteColor().toString(), animal.getFavoriteColor());
+//        barnRepository.save(tempBarn);
+//        newBarnList.add(tempBarn);
+//      }
+//    }
+//    else {
+//      for (int k = 0; k < matchingBarnsList.size(); k++) {
+//        if (averageAnimalsPerBarnRemainder > 0) {
+//          barnList.add(averageAnimalsPerBarnPlusRemainder);
+//          averageAnimalsPerBarnRemainder--;
+//          Barn tempBarn = new Barn(animal.getFavoriteColor().toString(), animal.getFavoriteColor());
+//          barnRepository.save(tempBarn);
+//          newBarnList.add(tempBarn);
+//          continue;
+//        }
+//        barnList.add(averageAnimalsPerBarn);
+//        Barn tempBarn = new Barn(animal.getFavoriteColor().toString(), animal.getFavoriteColor());
+//        barnRepository.save(tempBarn);
+//        newBarnList.add(tempBarn);
+//      }
+//    }
+
+    ArrayList<ArrayList<Animal>> listOfBarnsWithAnimals = new ArrayList<ArrayList<Animal>>();
+    ArrayList<Animal> tempAnimalsList = new ArrayList<Animal>();
+    ArrayList<Animal> animalsList = new ArrayList<Animal>();
 
 
-    barnAnimalMap.forEach((barn, animals) -> {
-      if ( barn.getColor() == animal.getFavoriteColor()) {
-        for(int k=0; k < animals.size(); k++) {
-          animalRepository.findById(animals.get(k).getId()).get().setBarn(null);
+    for (Map.Entry<Barn, List<Animal>> e : barnAnimalMap.entrySet()) {
+      Barn key = e.getKey();
+      List<Animal> value = e.getValue();
+      if (key.getColor() == animal.getFavoriteColor()) {
+        for (int k = 0; k < value.size(); k++) {
+          animalRepository.findById(value.get(k).getId()).get().setBarn(null);
+          tempAnimalsList.add(value.get(k));
         }
-        barnRepository.deleteById(barn.getId());
+        barnRepository.deleteById(key.getId());
+        removeFromMapList.add(key);
         multipleOf20DeleteFlag.set(true);
       }
 
-    });
+    }
 
-    // now need to spread out animals according to barnList elements
-    for (int k=0; k < barnList.size(); k++) {
-      int setsPerBarn = 0;
+    int tempAnimalsCounter = 0;
 
-      for (int j = 0; j < animalRepository.count(); j++) {
-            //if (animalRepository.findAll().get(j).getFavoriteColor() == newBarnList.get(k).getColor()) {
-            if (animalRepository.findAll().get(j).getBarn() == null) {
-              animalsAddedToBarn++;
+    for (int i=0; i < newBarnList.size(); i++) {
+      animalsList = new ArrayList<Animal>();
 
-              if (animalsAddedToBarn <= barnList.get(k)) {
-                if (setCount == animalsInMatchingColorBarn) {
-                  break;
-                }
-                animalRepository.findAll().get(j).setBarn(newBarnList.get(k));
-                setsPerBarn++;
-                setCount++;
-
-              } else {
-                animalsAddedToBarn = 0;
-                break;
-              }
-            }
+      for (int k=0; k < barnList.get(i); k++) {
+        if (tempAnimalsCounter < tempAnimalsList.size()) {
+          animalsList.add(tempAnimalsList.get(tempAnimalsCounter));
+          tempAnimalsCounter++;
+        }
       }
-      if (setsPerBarn > 20) {
-        System.out.println("STOP");
+
+      listOfBarnsWithAnimals.add(animalsList);
+    }
+
+
+
+    for (int i=0; i < removeFromMapList.size(); i++) {
+      if (barnAnimalMap.containsKey(removeFromMapList.get(i))) {
+        barnAnimalMap.remove(removeFromMapList.get(i));
       }
     }
 
-    animalResult = findAll();
-    barnAnimalMap = animalResult.stream()
-      .collect(Collectors.groupingBy(Animal::getBarn));
+    for (int i=0; i < newBarnList.size(); i++) {
+      barnAnimalMap.put(newBarnList.get(i), listOfBarnsWithAnimals.get(i));
+//      for (int k=0; k < barnList.get(i); k++) {
+//        barnAnimalMap.get(newBarnList.get(i)).add(listOfBarnsWithAnimals.get(i)));
+//      }
+    }
+
+    int iterationNumber = 0;
+
+      for (Map.Entry<Barn, List<Animal>> entry : barnAnimalMap.entrySet()) {
+
+          Barn barn = entry.getKey();
+          List<Animal> animals = entry.getValue();
+          if (barn.getColor() == animal.getFavoriteColor()) {
+            for (int k = 0; k < animals.size(); k++) {
+              //if (!deleteFlag) {
+                if (animals.get(k).getId() == null) {
+                  System.out.println("STOP");
+                }
+                animalRepository.findById(animals.get(k).getId()).get().setBarn(newBarnList.get(iterationNumber));
+             // }
+            }
+            iterationNumber++;
+          }
+
+
+
+      }
+
+//    animalResult = findAll();
+//    barnAnimalMap = animalResult.stream()
+//      .collect(Collectors.groupingBy(Animal::getBarn));
+
+    // now need to spread out animals according to barnList elements
+//    for (int k=0; k < barnList.size(); k++) {
+//      int setsPerBarn = 0;
+//
+//      for (int j = 0; j < animalRepository.count(); j++) {
+//            //if (animalRepository.findAll().get(j).getFavoriteColor() == newBarnList.get(k).getColor()) {
+//            if (animalRepository.findAll().get(j).getBarn() == null) {
+//              animalsAddedToBarn++;
+//
+//              if (animalsAddedToBarn <= barnList.get(k)) {
+//                if (setCount == animalsInMatchingColorBarn) {
+//                  break;
+//                }
+//                animalRepository.findAll().get(j).setBarn(newBarnList.get(k));
+//                setsPerBarn++;
+//                setCount++;
+//
+//              } else {
+//                animalsAddedToBarn = 0;
+//                break;
+//              }
+//            }
+//      }
+//      if (setsPerBarn > 20) {
+//        System.out.println("STOP");
+//      }
+//    }
+
+//    animalResult = findAll();
+//    barnAnimalMap = animalResult.stream()
+//      .collect(Collectors.groupingBy(Animal::getBarn));
 
     AtomicBoolean stop = new AtomicBoolean(false);
 
@@ -325,7 +403,7 @@ public class AnimalServiceImpl implements AnimalService {
     }
 
     if (matchingBarnsList.size() > 0) {
-      redistribute(matchingBarnsList, animalsInMatchingColorBarn, animal);
+      redistribute(matchingBarnsList, animalsInMatchingColorBarn, animal, true);
     }
 
   }

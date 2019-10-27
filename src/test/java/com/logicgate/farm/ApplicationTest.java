@@ -41,13 +41,13 @@ public class ApplicationTest {
     barnRepository.deleteAll();
   }
 
-//  @Test
-//  public void addAnimalsToFarm() {
-//    animalService.addToFarm(IntStream.range(0, ANIMAL_SEED)
-//        .mapToObj(value -> new Animal(FarmUtils.animalName(value), FarmUtils.randomColor()))
-//        .collect(Collectors.toList()));
-//    checkAnimals(ANIMAL_SEED);
-//  }
+  @Test
+  public void addAnimalsToFarm() {
+    animalService.addToFarm(IntStream.range(0, ANIMAL_SEED)
+        .mapToObj(value -> new Animal(FarmUtils.animalName(value), FarmUtils.randomColor()))
+        .collect(Collectors.toList()));
+    checkAnimals(ANIMAL_SEED);
+  }
 
   @Test
   public void removeAnimalsFromFarm() {
