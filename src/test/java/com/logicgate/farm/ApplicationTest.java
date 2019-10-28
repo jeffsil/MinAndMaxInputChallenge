@@ -66,9 +66,7 @@ public class ApplicationTest {
   }
 
   private void checkAnimals(int expected) {
-    System.out.println("check animals");
     List<Animal> animalResult = animalService.findAll();
-    System.out.println("animal result size is " +animalResult.size());
     assertThat("Animal updates should reflect in persisted entities.", animalResult.size(), is(expected));
 
     Map<Barn, List<Animal>> barnAnimalMap = animalResult.stream()
@@ -86,13 +84,13 @@ public class ApplicationTest {
     Map<Color, List<Barn>> colorBarnMap = barnAnimalMap.keySet().stream()
         .collect(Collectors.groupingBy(Barn::getColor));
 
-    colorBarnMap.forEach((color, barns) -> {
-      System.out.println("color is " +color.toString() +" and barns " +barns.toString()
-        +" barn size is "
-        +barns.stream()
-        .map(barn -> barnAnimalMap.get(barn).size())
-        .collect(Collectors.toList()));
-    });
+//    colorBarnMap.forEach((color, barns) -> {
+//      System.out.println("color is " +color.toString() +" and barns " +barns.toString()
+//        +" barn size is "
+//        +barns.stream()
+//        .map(barn -> barnAnimalMap.get(barn).size())
+//        .collect(Collectors.toList()));
+//    });
 
 
     colorBarnMap.forEach((color, barns) -> {
@@ -108,11 +106,11 @@ public class ApplicationTest {
           .mapToInt(i -> i)
           .sum();
 
-      System.out.println("******************unused is " +unusedCapacity.toString() +" color is " +color.toString()
-        +" totalUnused is " +totalUnusedCapacity.toString() +" minCapacity is " +minCapacity.toString()
-        +" collections.max unused is " +(Collections.max(unusedCapacity))
-        +" collections.min unused is " +(Collections.min(unusedCapacity))
-        +" free barn space is " + (Collections.max(unusedCapacity) - Collections.min(unusedCapacity)));
+//      System.out.println("******************unused is " +unusedCapacity.toString() +" color is " +color.toString()
+//        +" totalUnused is " +totalUnusedCapacity.toString() +" minCapacity is " +minCapacity.toString()
+//        +" collections.max unused is " +(Collections.max(unusedCapacity))
+//        +" collections.min unused is " +(Collections.min(unusedCapacity))
+//        +" free barn space is " + (Collections.max(unusedCapacity) - Collections.min(unusedCapacity)));
 
       assertThat("Optimal barns should exist for capacity requirements.",
           minCapacity, greaterThan(totalUnusedCapacity));

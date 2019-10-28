@@ -68,14 +68,17 @@ public class AnimalServiceImpl implements AnimalService {
       return tempAnimal;
     }
 
-    for (int i=0; i < barnCount; i++) {
-      if (barnRepository.findAll().get(i).getColor().equals((animal.getFavoriteColor()))) {
-        matchingBarnsList.add(barnRepository.findAll().get(i));
+    for (Map.Entry<Barn, List<Animal>> e : barnAnimalMap.entrySet()) {
+      Barn key = e.getKey();
+      List<Animal> value = e.getValue();
+      if (key.getColor() == animal.getFavoriteColor()) {
+        matchingBarnsList.add(key);
       }
+
     }
 
     for (int i=0; i < barnCount; i++) {
-      barnCount = barnRepository.count();
+//      barnCount = barnRepository.count();
       if (barnRepository.findAll().get(i).getColor().equals((animal.getFavoriteColor()))) {
         barnFound = true;
         barnFoundObj = barnRepository.findAll().get(i);
@@ -92,13 +95,22 @@ public class AnimalServiceImpl implements AnimalService {
               .collect(Collectors.groupingBy(Animal::getBarn));
 
             matchingBarnsList = new ArrayList<>();
-            barnCount = barnRepository.count();
+//            barnCount = barnRepository.count();
 
-            for (int j=0; j < barnCount; j++) {
-              if (barnRepository.findAll().get(j).getColor().equals((animal.getFavoriteColor()))) {
-                matchingBarnsList.add(barnRepository.findAll().get(j));
+            for (Map.Entry<Barn, List<Animal>> e : barnAnimalMap.entrySet()) {
+              Barn key = e.getKey();
+              List<Animal> value = e.getValue();
+              if (key.getColor() == animal.getFavoriteColor()) {
+                matchingBarnsList.add(key);
               }
+
             }
+
+//            for (int j=0; j < barnCount; j++) {
+//              if (barnRepository.findAll().get(j).getColor().equals((animal.getFavoriteColor()))) {
+//                matchingBarnsList.add(barnRepository.findAll().get(j));
+//              }
+//            }
 
 
             for (int j = 0; j < matchingBarnsList.size(); j++) {
@@ -136,13 +148,22 @@ public class AnimalServiceImpl implements AnimalService {
       barnAnimalMap = animalResult.stream()
         .collect(Collectors.groupingBy(Animal::getBarn));
 
-      barnCount = barnRepository.count();
+//      barnCount = barnRepository.count();
 
-      for (int i=0; i < barnCount; i++) {
-        if (barnRepository.findAll().get(i).getColor().equals((animal.getFavoriteColor()))) {
-          matchingBarnsList.add(barnRepository.findAll().get(i));
+      for (Map.Entry<Barn, List<Animal>> e : barnAnimalMap.entrySet()) {
+        Barn key = e.getKey();
+        List<Animal> value = e.getValue();
+        if (key.getColor() == animal.getFavoriteColor()) {
+          matchingBarnsList.add(key);
         }
+
       }
+
+//      for (int i=0; i < barnCount; i++) {
+//        if (barnRepository.findAll().get(i).getColor().equals((animal.getFavoriteColor()))) {
+//          matchingBarnsList.add(barnRepository.findAll().get(i));
+//        }
+//      }
 
       for (int i=0; i < barnCount; i++) {
         if (barnRepository.findAll().get(i).getColor().equals((animal.getFavoriteColor()))) {
@@ -150,19 +171,19 @@ public class AnimalServiceImpl implements AnimalService {
           int animalCount = barnAnimalMap.get(barnFoundObj).size();
           int animalsInMatchingColorBarn = 0;
 
-            if (matchingBarnsList.size() > 1) {
+          if (matchingBarnsList.size() > 1) {
 
-              for (int j = 0; j < matchingBarnsList.size(); j++) {
-                animalsInMatchingColorBarn+=barnAnimalMap.get(matchingBarnsList.get(j)).size();
-              }
+            for (int j = 0; j < matchingBarnsList.size(); j++) {
+              animalsInMatchingColorBarn+=barnAnimalMap.get(matchingBarnsList.get(j)).size();
+            }
 
-              redistribute(matchingBarnsList, animalsInMatchingColorBarn, tempAnimal, false);
+            redistribute(matchingBarnsList, animalsInMatchingColorBarn, tempAnimal, false);
 
 //              System.out.println("total barns for this color is " +matchingBarnsList.size()
 //                +" animals in matching color barn is " +animalsInMatchingColorBarn);
-              return tempAnimal;
-            }
             return tempAnimal;
+          }
+          return tempAnimal;
 
         }
       }
@@ -291,25 +312,25 @@ public class AnimalServiceImpl implements AnimalService {
 
     int iterationNumber = 0;
 
-      for (Map.Entry<Barn, List<Animal>> entry : barnAnimalMap.entrySet()) {
+    for (Map.Entry<Barn, List<Animal>> entry : barnAnimalMap.entrySet()) {
 
-          Barn barn = entry.getKey();
-          List<Animal> animals = entry.getValue();
-          if (barn.getColor() == animal.getFavoriteColor()) {
-            for (int k = 0; k < animals.size(); k++) {
-              //if (!deleteFlag) {
-                if (animals.get(k).getId() == null) {
-                  System.out.println("STOP");
-                }
-                animalRepository.findById(animals.get(k).getId()).get().setBarn(newBarnList.get(iterationNumber));
-             // }
-            }
-            iterationNumber++;
+      Barn barn = entry.getKey();
+      List<Animal> animals = entry.getValue();
+      if (barn.getColor() == animal.getFavoriteColor()) {
+        for (int k = 0; k < animals.size(); k++) {
+          //if (!deleteFlag) {
+          if (animals.get(k).getId() == null) {
+            System.out.println("STOP");
           }
-
-
-
+          animalRepository.findById(animals.get(k).getId()).get().setBarn(newBarnList.get(iterationNumber));
+          // }
+        }
+        iterationNumber++;
       }
+
+
+
+    }
 
 //    animalResult = findAll();
 //    barnAnimalMap = animalResult.stream()
